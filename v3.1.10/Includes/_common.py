@@ -1,4 +1,8 @@
 # Databricks notebook source
+# MAGIC %run ./Clean_DBFS
+
+# COMMAND ----------
+
 def __validate_libraries():
     import requests
     try:
@@ -125,3 +129,7 @@ def display_config_values(self, config_values):
 ANALYSTS_ROLE_NAME = "analysts"
 
 None
+
+# COMMAND ----------
+
+

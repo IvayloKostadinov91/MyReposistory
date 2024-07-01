@@ -105,6 +105,7 @@
 
 # COMMAND ----------
 
+my_name = "Your Name"  # Assign a non-None value to my_name
 assert my_name is not None, "Name is still None"
 print(my_name)
 
