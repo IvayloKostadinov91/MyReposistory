@@ -193,15 +193,55 @@ DESCRIBE EXTENDED sales_csv
 
 -- COMMAND ----------
 
+SELECT COUNT(*) FROM sales_csv
+
+-- COMMAND ----------
+
+CREATE TABLE IF NOT EXISTS sales_csv_test
+  (order_id LONG, email STRING, transactions_timestamp LONG, total_item_quantity INTEGER, purchase_revenue_in_usd DOUBLE, unique_items INTEGER, items STRING)
+USING CSV
+OPTIONS (
+  header = "true",
+  delimiter = "|"
+)
+LOCATION "dbfs:/mnt/dbacademy-users/ivaylo.kostadinov@adastragrpbg.onmicrosoft.com/data-engineering-with-databricks/sales_csv_test"
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC (spark.read
+-- MAGIC       .option("header", "true")
+-- MAGIC       .option("delimiter", "|")
+-- MAGIC       .csv(DA.paths.sales_csv)
+-- MAGIC       .write.mode("append")
+-- MAGIC       .format("csv")
+-- MAGIC       .save("dbfs:/mnt/dbacademy-users/ivaylo.kostadinov@adastragrpbg.onmicrosoft.com/data-engineering-with-databricks/sales_csv_test", header="true"))
+
+-- COMMAND ----------
+
+SELECT COUNT(*) FROM sales_csv_test
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC type(DA.paths)
+
+-- COMMAND ----------
+
+show tables
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC print(DA.paths)
+
+-- COMMAND ----------
+
 -- DBTITLE 0,--i18n-28b2112b-4eb2-4bd4-ad76-131e010dfa44
 -- MAGIC %md
 -- MAGIC
 -- MAGIC
 -- MAGIC If we look at the current count of records in our table, the number we see will not reflect these newly inserted rows.
-
--- COMMAND ----------
-
-SELECT COUNT(*) FROM sales_csv
 
 -- COMMAND ----------
 
@@ -217,7 +257,8 @@ SELECT COUNT(*) FROM sales_csv
 
 -- COMMAND ----------
 
-REFRESH TABLE sales_csv
+REFRESH TABLE sales_csv;
+REFRESH TABLE sales_csv_test
 
 -- COMMAND ----------
 
@@ -338,6 +379,11 @@ DESCRIBE EXTENDED users_jdbc
 -- MAGIC
 -- MAGIC  
 -- MAGIC Run the following cell to delete the tables and files associated with this lesson.
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC %run ../Includes/Clean_DBFS
 
 -- COMMAND ----------
 

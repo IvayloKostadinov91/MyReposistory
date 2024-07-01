@@ -60,6 +60,33 @@ SELECT * FROM events_strings
 -- COMMAND ----------
 
 -- MAGIC %python
+-- MAGIC from pyspark.sql import SparkSession
+-- MAGIC from pyspark.sql.types import StructType, StructField, IntegerType, BinaryType
+-- MAGIC
+-- MAGIC # Initialize Spark session
+-- MAGIC spark = SparkSession.builder.appName("BinaryTypeExample").getOrCreate()
+-- MAGIC
+-- MAGIC # Sample data with binary content
+-- MAGIC data = [
+-- MAGIC     (1, bytearray([65, 66, 67])),  # Binary data for "ABC"
+-- MAGIC     (2, bytearray([68, 69, 70]))   # Binary data for "DEF"
+-- MAGIC ]
+-- MAGIC
+-- MAGIC # Define schema with BinaryType
+-- MAGIC schema = StructType([
+-- MAGIC     StructField("id", IntegerType(), True),
+-- MAGIC     StructField("binary_data", BinaryType(), True)
+-- MAGIC ])
+-- MAGIC
+-- MAGIC # Create DataFrame
+-- MAGIC df = spark.createDataFrame(data, schema)
+-- MAGIC
+-- MAGIC # Show the DataFrame
+-- MAGIC df.show()
+
+-- COMMAND ----------
+
+-- MAGIC %python
 -- MAGIC from pyspark.sql.functions import col
 -- MAGIC
 -- MAGIC events_stringsDF = (spark
@@ -98,7 +125,7 @@ SELECT * FROM events_strings WHERE value:event_name = "finalize" ORDER BY key LI
 -- MAGIC display(events_stringsDF
 -- MAGIC     .where("value:event_name = 'finalize'")
 -- MAGIC     .orderBy("key")
--- MAGIC     .limit(1)
+-- MAGIC     .limit(10)
 -- MAGIC )
 
 -- COMMAND ----------
@@ -114,7 +141,7 @@ SELECT * FROM events_strings WHERE value:event_name = "finalize" ORDER BY key LI
 
 -- COMMAND ----------
 
-SELECT schema_of_json('{"device":"Linux","ecommerce":{"purchase_revenue_in_usd":1075.5,"total_item_quantity":1,"unique_items":1},"event_name":"finalize","event_previous_timestamp":1593879231210816,"event_timestamp":1593879335779563,"geo":{"city":"Houston","state":"TX"},"items":[{"coupon":"NEWBED10","item_id":"M_STAN_K","item_name":"Standard King Mattress","item_revenue_in_usd":1075.5,"price_in_usd":1195.0,"quantity":1}],"traffic_source":"email","user_first_touch_timestamp":1593454417513109,"user_id":"UA000000106116176"}') AS schema
+SELECT schema_of_json('{"device":"Android","ecommerce":{"purchase_revenue_in_usd":940.5,"total_item_quantity":1,"unique_items":1},"event_name":"finalize","event_previous_timestamp":1593879716269372,"event_timestamp":1593879731743920,"geo":{"city":"Leitchfield","state":"KY"},"items":[{"coupon":"NEWBED10","item_id":"M_STAN_Q","item_name":"Standard Queen Mattress","item_revenue_in_usd":940.5,"price_in_usd":1045.0,"quantity":1}],"traffic_source":"email","user_first_touch_timestamp":1593632616907199,"user_id":"UA000000106629972"}') AS schema
 
 -- COMMAND ----------
 
@@ -130,7 +157,7 @@ SELECT * FROM parsed_events
 -- MAGIC from pyspark.sql.functions import from_json, schema_of_json
 -- MAGIC
 -- MAGIC json_string = """
--- MAGIC {"device":"Linux","ecommerce":{"purchase_revenue_in_usd":1047.6,"total_item_quantity":2,"unique_items":2},"event_name":"finalize","event_previous_timestamp":1593879787820475,"event_timestamp":1593879948830076,"geo":{"city":"Huntington Park","state":"CA"},"items":[{"coupon":"NEWBED10","item_id":"M_STAN_Q","item_name":"Standard Queen Mattress","item_revenue_in_usd":940.5,"price_in_usd":1045.0,"quantity":1},{"coupon":"NEWBED10","item_id":"P_DOWN_S","item_name":"Standard Down Pillow","item_revenue_in_usd":107.10000000000001,"price_in_usd":119.0,"quantity":1}],"traffic_source":"email","user_first_touch_timestamp":1593583891412316,"user_id":"UA000000106459577"}
+-- MAGIC {"device":"Android","ecommerce":{"purchase_revenue_in_usd":940.5,"total_item_quantity":1,"unique_items":1},"event_name":"finalize","event_previous_timestamp":1593879716269372,"event_timestamp":1593879731743920,"geo":{"city":"Leitchfield","state":"KY"},"items":[{"coupon":"NEWBED10","item_id":"M_STAN_Q","item_name":"Standard Queen Mattress","item_revenue_in_usd":940.5,"price_in_usd":1045.0,"quantity":1}],"traffic_source":"email","user_first_touch_timestamp":1593632616907199,"user_id":"UA000000106629972"}
 -- MAGIC """
 -- MAGIC parsed_eventsDF = (events_stringsDF
 -- MAGIC     .select(from_json("value", schema_of_json(json_string)).alias("json"))
@@ -138,6 +165,11 @@ SELECT * FROM parsed_events
 -- MAGIC )
 -- MAGIC
 -- MAGIC display(parsed_eventsDF)
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC display(json_string)
 
 -- COMMAND ----------
 
@@ -187,7 +219,9 @@ DESCRIBE exploded_events
 
 SELECT user_id,
   collect_set(event_name) AS event_history,
-  array_distinct(flatten(collect_set(items.item_id))) AS cart_history
+  array_distinct(flatten(collect_set(items.item_id))) AS cart_history,
+  collect_set(items.price_in_usd) as price_usd,
+  
 FROM exploded_events
 GROUP BY user_id
 
@@ -246,6 +280,87 @@ SELECT * FROM item_purchases
 -- MAGIC )
 -- MAGIC
 -- MAGIC display(item_purchasesDF)
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC from pyspark.sql import SparkSession
+-- MAGIC
+-- MAGIC # Initialize Spark session
+-- MAGIC spark = SparkSession.builder.appName("SparkCatalogExample").getOrCreate()
+-- MAGIC
+-- MAGIC # Access the catalog
+-- MAGIC catalog = spark.catalog
+-- MAGIC
+-- MAGIC # List all databases
+-- MAGIC databases = catalog.listDatabases()
+-- MAGIC print("Databases:")
+-- MAGIC for db in databases:
+-- MAGIC     print(f" - {db.name}")
+-- MAGIC
+-- MAGIC # List all tables in the default database
+-- MAGIC tables = catalog.listTables()
+-- MAGIC print("\nTables in default database:")
+-- MAGIC for table in tables:
+-- MAGIC     print(f" - {table.name}")
+-- MAGIC
+-- MAGIC # List all tables in a specific database
+-- MAGIC tables_in_db = catalog.listTables("ivaylo_kostadinov_imho_da_dewd")
+-- MAGIC print("\nTables in ivaylo_kostadinov_imho_da_dewd:")
+-- MAGIC for table in tables_in_db:
+-- MAGIC     print(f" - {table.name}")
+-- MAGIC
+-- MAGIC # List all functions
+-- MAGIC functions = catalog.listFunctions()
+-- MAGIC print("\nFunctions:")
+-- MAGIC for function in functions:
+-- MAGIC     print(f" - {function.name}")
+-- MAGIC
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC from pyspark.sql import SparkSession
+-- MAGIC
+-- MAGIC # Initialize Spark session
+-- MAGIC #spark = SparkSession.builder.appName("SparkCatalogFullExample").getOrCreate()
+-- MAGIC
+-- MAGIC # Sample data
+-- MAGIC data = [("Alice", 30), ("Bob", 25), ("Charlie", 35)]
+-- MAGIC columns = ["name", "age"]
+-- MAGIC
+-- MAGIC # Create DataFrame
+-- MAGIC df = spark.createDataFrame(data, columns)
+-- MAGIC
+-- MAGIC # Create a temporary view
+-- MAGIC df.createOrReplaceTempView("people")
+-- MAGIC
+-- MAGIC # List all tables in the default database
+-- MAGIC tables = spark.catalog.listTables()
+-- MAGIC print("Tables in default database:")
+-- MAGIC for table in tables:
+-- MAGIC     print(f" - {table.name}")
+-- MAGIC
+-- MAGIC # Query the temporary view
+-- MAGIC result = spark.sql("SELECT * FROM people")
+-- MAGIC result.show()
+-- MAGIC
+-- MAGIC # Retrieve table metadata
+-- MAGIC table_metadata = spark.catalog.getTable("people")
+-- MAGIC print("Table Metadata:")
+-- MAGIC print(f" - Name: {table_metadata.name}")
+-- MAGIC print(f" - Database: {table_metadata.database}")
+-- MAGIC print(f" - Table Type: {table_metadata.tableType}")
+-- MAGIC print(f" - Is Temporary: {table_metadata.isTemporary}")
+-- MAGIC
+-- MAGIC # Drop the temporary view
+-- MAGIC spark.catalog.dropTempView("people")
+-- MAGIC
+-- MAGIC
+
+-- COMMAND ----------
+
+select * from item_lookup
 
 -- COMMAND ----------
 

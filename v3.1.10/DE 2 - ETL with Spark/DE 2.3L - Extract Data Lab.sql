@@ -37,6 +37,11 @@
 
 -- COMMAND ----------
 
+-- MAGIC %python
+-- MAGIC print("be awake")
+
+-- COMMAND ----------
+
 -- DBTITLE 0,--i18n-9adc06e2-7298-4306-a062-7ff70adb8032
 -- MAGIC %md
 -- MAGIC
@@ -77,8 +82,37 @@
 
 -- COMMAND ----------
 
--- TODO
-<FILL_IN> "${DA.paths.kafka_events}" 
+CREATE OR REPLACE TABLE events_json
+AS
+SELECT
+  CAST(key AS BINARY) AS key,
+  CAST(offset AS BIGINT) AS offset,
+  CAST(partition AS INT) AS partition,
+  CAST(timestamp AS BIGINT) AS timestamp,
+  CAST(topic AS STRING) AS topic,
+  CAST(value AS BINARY) AS value
+FROM json.`${DA.paths.kafka_events}`
+
+-- COMMAND ----------
+
+CREATE TABLE IF NOT EXISTS events_json (
+  key BINARY,
+  offset BIGINT,
+  partition INT,
+  timestamp BIGINT,
+  topic STRING,
+  value BINARY
+)
+USING json
+LOCATION "${DA.paths.kafka_events}";
+
+-- COMMAND ----------
+
+drop table if exists events_json
+
+-- COMMAND ----------
+
+SELECT * FROM events_json
 
 -- COMMAND ----------
 
@@ -107,6 +141,10 @@
 -- MAGIC
 -- MAGIC  
 -- MAGIC Run the following cell to delete the tables and files associated with this lesson.
+
+-- COMMAND ----------
+
+
 
 -- COMMAND ----------
 
