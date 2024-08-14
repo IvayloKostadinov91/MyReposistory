@@ -72,7 +72,7 @@
 -- COMMAND ----------
 
 -- TODO
-<FILL_IN>
+CREATE OR REPLACE TABLE events_raw (key BINARY, offset LONG, partition INTEGER, timestamp LONG, topic STRING, value BINARY)
 
 -- COMMAND ----------
 
@@ -114,8 +114,23 @@
 
 -- COMMAND ----------
 
+SELECT * FROM events_json
+
+-- COMMAND ----------
+
 -- TODO
-<FILL_IN>
+CREATE OR REPLACE TEMP VIEW vw_events_json
+AS
+SELECT * FROM events_json;
+
+SELECT * FROM vw_events_json
+
+-- COMMAND ----------
+
+MERGE INTO events_raw r USING vw_events_json j ON r.key = j.key
+WHEN NOT MATCHED THEN
+INSERT
+  *
 
 -- COMMAND ----------
 
@@ -129,7 +144,7 @@
 -- COMMAND ----------
 
 -- TODO
-<FILL_IN>
+SELECT * FROM events_raw
 
 -- COMMAND ----------
 
@@ -174,7 +189,33 @@
 -- COMMAND ----------
 
 -- TODO
-<FILL_IN> ${da.paths.datasets}/ecommerce/raw/item-lookup
+CREATE
+OR REPLACE TABLE item_lookup AS
+SELECT
+  *
+FROM
+  PARQUET.`${da.paths.datasets}/ecommerce/raw/item-lookup`
+
+-- COMMAND ----------
+
+SELECT * FROM  item_lookup
+
+
+-- COMMAND ----------
+
+drop table item_lookup
+
+-- COMMAND ----------
+
+CREATE
+--OR REPLACE
+TABLE
+ item_lookup
+(item_id STRING, name STRING, price DOUBLE)
+USING PARQUET
+OPTIONS(
+path = "${da.paths.datasets}/ecommerce/raw/item-lookup"
+)
 
 -- COMMAND ----------
 

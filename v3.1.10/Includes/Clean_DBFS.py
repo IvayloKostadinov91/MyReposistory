@@ -1,5 +1,6 @@
 # Databricks notebook source
 #path
+#users_path = "dbfs:/mnt/dbacademy-users/ivaylo.kostadinov@adastragrpbg.onmicrosoft.com/data-engineering-with-databricks"
 users_path = "dbfs:/mnt/dbacademy-users/ivaylo.kostadinov@adastragrpbg.onmicrosoft.com/data-engineering-with-databricks"
 datasets_path = "dbfs:/mnt/dbacademy-datasets/data-engineer-learning-path"
 

@@ -58,10 +58,18 @@
 
 -- COMMAND ----------
 
+
+
+-- COMMAND ----------
+
+SELECT * FROM sales
+
+-- COMMAND ----------
+
 SELECT * FROM (
   SELECT
     order_id,
-    FILTER (items, i -> i.item_id LIKE "%K") AS king_items
+    FILTER (items, i -> i.item_name LIKE "Standard%") AS king_items
   FROM sales)
 WHERE size(king_items) > 0
 
@@ -115,9 +123,11 @@ FROM sales
 
 -- TODO
 CREATE OR REPLACE TABLE sales_product_flags AS
-<FILL_IN>
-EXISTS <FILL_IN>.item_name LIKE "%Mattress"
-EXISTS <FILL_IN>.item_name LIKE "%Pillow"
+SELECT
+items,
+EXISTS (items, i -> i.item_name LIKE "%Mattress") AS mattress,
+EXISTS (items, i -> i.item_name LIKE "%Pillow") AS pillow
+FROM sales
 
 -- COMMAND ----------
 

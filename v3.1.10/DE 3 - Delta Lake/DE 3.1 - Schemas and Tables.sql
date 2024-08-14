@@ -123,6 +123,11 @@ DESCRIBE EXTENDED managed_table;
 
 -- COMMAND ----------
 
+-- MAGIC %python
+-- MAGIC display(tbl_location)
+
+-- COMMAND ----------
+
 -- DBTITLE 0,--i18n-507a84a5-f60f-4923-8f48-475ee3270dbd
 -- MAGIC %md
 -- MAGIC
