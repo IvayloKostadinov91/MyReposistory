@@ -120,8 +120,8 @@ DESCRIBE HISTORY sales
 
 -- COMMAND ----------
 
--- INSERT OVERWRITE sales
--- SELECT *, current_timestamp() FROM parquet.`${da.paths.datasets}/ecommerce/raw/sales-historical`
+ INSERT OVERWRITE sales
+ SELECT *, current_timestamp() FROM parquet.`${da.paths.datasets}/ecommerce/raw/sales-historical`
 
 -- COMMAND ----------
 
@@ -264,6 +264,30 @@ FILEFORMAT = PARQUET
 -- MAGIC
 -- MAGIC  
 -- MAGIC Run the following cell to delete the tables and files associated with this lesson.
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC from pyspark.sql import SparkSession
+-- MAGIC
+-- MAGIC # Assuming 'spark' is your SparkSession
+-- MAGIC dbutils.fs.rm("dbfs:/mnt/dbacademy-users/ivaylo.kostadinov@adastragrpbg.onmicrosoft.com/data-engineering-with-databricks", recurse=True)
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC from pyspark.sql import SparkSession
+-- MAGIC import shutil
+-- MAGIC
+-- MAGIC # Initialize Spark session
+-- MAGIC spark = SparkSession.builder.getOrCreate()
+-- MAGIC
+-- MAGIC # Define the directory path
+-- MAGIC directory_path = "dbfs:/mnt/dbacademy-users/ivaylo.kostadinov@adastragrpbg.onmicrosoft.com/data-engineering-with-databricks"
+-- MAGIC
+-- MAGIC # Recursively delete the contents of the directory
+-- MAGIC dbutils.fs.rm(directory_path, recurse=True)
+-- MAGIC
 
 -- COMMAND ----------
 
